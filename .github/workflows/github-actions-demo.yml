@@ -1,4 +1,4 @@
-name: 
+name: Testing workflow with name
 
 on: [push]
 
