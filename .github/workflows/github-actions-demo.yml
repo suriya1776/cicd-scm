@@ -1,4 +1,5 @@
 name: Testing workflow with name
+run_name: Testing run name
 
 on: [push]
 
