@@ -1,1 +1,11 @@
+name: 
 
+on: [push]
+
+jobs:
+  print_job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print Hello Message
+        run: echo "Hello, this is a basic print statement workflow!"
