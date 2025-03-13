@@ -1,12 +1,49 @@
-name: Testing workflow with name
-run-name: Testing input context ,  ${{ inputs.deploy_target }}
+name: Build and Push Microservices
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
 
 jobs:
-  print_job:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Print Hello Message
-        run: echo "Hello, this is a basic print statement workflow!"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Fetch previous commit to compare changes
+
+      - name: Get Changed Files
+        id: changed-files
+        run: |
+          echo "Detecting changed files..."
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^src/' | cut -d '/' -f2 | sort -u)
+          echo "CHANGED_SERVICES=$CHANGED_FILES" >> $GITHUB_ENV
+
+      - name: Set Release Tag
+        id: release-tag
+        run: echo "RELEASE_TAG=release_$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+      - name: Log In to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+           registry: docker.io
+           username: ${{ secrets.DOCKER_USERNAME }}
+           password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+      - name: Build and Push Docker Images
+        run: |
+          for SERVICE in $CHANGED_SERVICES; do
+            IMAGE_NAME="suriya1776/opentelemetry/$SERVICE"
+            echo "Building and pushing $IMAGE_NAME:$RELEASE_TAG..."
+            docker build -t $IMAGE_NAME:$RELEASE_TAG src/$SERVICE
+            docker push $IMAGE_NAME:$RELEASE_TAG
+          done
