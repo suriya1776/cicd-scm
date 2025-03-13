@@ -51,7 +51,7 @@ jobs:
           fi
 
           for SERVICE in $CHANGED_SERVICES; do
-            IMAGE_NAME="suriya1776/opentelementry:$SERVICE_$RELEASE_TAG"
+            IMAGE_NAME="suriya1776/opentelementry:${SERVICE}_${RELEASE_TAG}"
             
             echo "🔹 Processing service: $SERVICE"
             echo "📦 Building Docker image: $IMAGE_NAME"
