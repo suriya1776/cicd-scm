@@ -50,24 +50,24 @@ jobs:
             exit 0
           fi
 
-        for SERVICE in $CHANGED_SERVICES; do
-          IMAGE_NAME="suriya1776/opentelementry:$SERVICE_$RELEASE_TAG"
+          for SERVICE in $CHANGED_SERVICES; do
+            IMAGE_NAME="suriya1776/opentelementry:$SERVICE_$RELEASE_TAG"
+            
+            echo "🔹 Processing service: $SERVICE"
+            echo "📦 Building Docker image: $IMAGE_NAME"
           
-          echo "🔹 Processing service: $SERVICE"
-          echo "📦 Building Docker image: $IMAGE_NAME"
-        
-          docker build --progress=plain -t $IMAGE_NAME src/$SERVICE || {
-            echo "❌ Build failed for $SERVICE"
-            exit 1
-          }
-        
-          echo "📤 Pushing Docker image: $IMAGE_NAME"
-          docker push $IMAGE_NAME || {
-            echo "❌ Push failed for $SERVICE"
-            exit 1
-          }
-        
-          echo "✅ Successfully pushed $IMAGE_NAME"
-        done
+            docker build --progress=plain -t $IMAGE_NAME src/$SERVICE || {
+              echo "❌ Build failed for $SERVICE"
+              exit 1
+            }
+          
+            echo "📤 Pushing Docker image: $IMAGE_NAME"
+            docker push $IMAGE_NAME || {
+              echo "❌ Push failed for $SERVICE"
+              exit 1
+            }
+          
+            echo "✅ Successfully pushed $IMAGE_NAME"
+          done
         
         
