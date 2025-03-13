@@ -50,21 +50,24 @@ jobs:
             exit 0
           fi
 
-          for SERVICE in $CHANGED_SERVICES; do
-            IMAGE_NAME="suriya1776/opentelemetry/$SERVICE"
-            echo "🔹 Processing service: $SERVICE"
-            echo "📦 Building Docker image: $IMAGE_NAME:$RELEASE_TAG"
-
-            docker build --progress=plain -t $IMAGE_NAME:$RELEASE_TAG src/$SERVICE || {
-              echo "❌ Build failed for $SERVICE"
-              exit 1
-            }
-
-            echo "📤 Pushing Docker image: $IMAGE_NAME:$RELEASE_TAG"
-            docker push $IMAGE_NAME:$RELEASE_TAG || {
-              echo "❌ Push failed for $SERVICE"
-              exit 1
-            }
-
-            echo "✅ Successfully pushed $IMAGE_NAME:$RELEASE_TAG"
-          done
+        for SERVICE in $CHANGED_SERVICES; do
+          IMAGE_NAME="suriya1776/opentelementry:$SERVICE_$RELEASE_TAG"
+          
+          echo "🔹 Processing service: $SERVICE"
+          echo "📦 Building Docker image: $IMAGE_NAME"
+        
+          docker build --progress=plain -t $IMAGE_NAME src/$SERVICE || {
+            echo "❌ Build failed for $SERVICE"
+            exit 1
+          }
+        
+          echo "📤 Pushing Docker image: $IMAGE_NAME"
+          docker push $IMAGE_NAME || {
+            echo "❌ Push failed for $SERVICE"
+            exit 1
+          }
+        
+          echo "✅ Successfully pushed $IMAGE_NAME"
+        done
+        
+        
