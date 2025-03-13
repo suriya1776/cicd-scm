@@ -1,5 +1,5 @@
 name: Testing workflow with name
-run-name: Testing input context,  ${{input.build_id}}
+run-name: Testing input context,  ${{inputs.build_id}}
 
 on: [push]
 
