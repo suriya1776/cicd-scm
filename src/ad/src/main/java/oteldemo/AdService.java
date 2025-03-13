@@ -108,7 +108,7 @@ public final class AdService {
                   System.err.println(
                       "*** shutting down gRPC ads server since JVM is shutting down");
                   AdService.this.stop();
-                  System.err.println("*** custom-1 server shut down");
+                  System.err.println("*** custom-2 server shut down");
                 }));
     healthMgr.setStatus("", ServingStatus.SERVING);
   }
