@@ -23,27 +23,48 @@ jobs:
       - name: Get Changed Files
         id: changed-files
         run: |
-          echo "Detecting changed files..."
+          echo "🔍 Detecting changed files..."
           CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^src/' | cut -d '/' -f2 | sort -u)
+          echo "Changed services: $CHANGED_FILES"
           echo "CHANGED_SERVICES=$CHANGED_FILES" >> $GITHUB_ENV
 
       - name: Set Release Tag
         id: release-tag
-        run: echo "RELEASE_TAG=release_$(date +'%Y%m%d')" >> $GITHUB_ENV
+        run: |
+          export TAG=release_$(date +'%Y%m%d')
+          echo "🆕 Release tag: $TAG"
+          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
 
-      - name: Log In to GitHub Container Registry
+      - name: Log In to Docker Hub
         uses: docker/login-action@v3
         with:
-           registry: docker.io
-           username: ${{ secrets.DOCKER_USERNAME }}
-           password: ${{ secrets.DOCKER_PASSWORD }}
-
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push Docker Images
         run: |
+          echo "🚀 Starting build process..."
+          if [[ -z "$CHANGED_SERVICES" ]]; then
+            echo "✅ No microservices changed. Skipping Docker build & push."
+            exit 0
+          fi
+
           for SERVICE in $CHANGED_SERVICES; do
             IMAGE_NAME="suriya1776/opentelemetry/$SERVICE"
-            echo "Building and pushing $IMAGE_NAME:$RELEASE_TAG..."
-            docker build -t $IMAGE_NAME:$RELEASE_TAG src/$SERVICE
-            docker push $IMAGE_NAME:$RELEASE_TAG
+            echo "🔹 Processing service: $SERVICE"
+            echo "📦 Building Docker image: $IMAGE_NAME:$RELEASE_TAG"
+
+            docker build --progress=plain -t $IMAGE_NAME:$RELEASE_TAG src/$SERVICE || {
+              echo "❌ Build failed for $SERVICE"
+              exit 1
+            }
+
+            echo "📤 Pushing Docker image: $IMAGE_NAME:$RELEASE_TAG"
+            docker push $IMAGE_NAME:$RELEASE_TAG || {
+              echo "❌ Push failed for $SERVICE"
+              exit 1
+            }
+
+            echo "✅ Successfully pushed $IMAGE_NAME:$RELEASE_TAG"
           done
